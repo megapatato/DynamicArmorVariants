@@ -6,7 +6,25 @@ project(
 	LANGUAGES CXX
 )
 
+# Fetch dependencies
+include(FetchContent)
+
+# SKSE
+FetchContent_Declare(
+  skse_sdk
+  URL      https://skse.silverlock.org/beta/skse64_2_02_06.7z
+)
+
+# Fetch MCM Helper SDK
+FetchContent_Declare(
+  mcm_helper_sdk
+  URL      https://github.com/Exit-9B/MCM-Helper/releases/download/v1.5.0/MCM.SDK.7z
+)
+
+FetchContent_MakeAvailable(skse_sdk mcm_helper_sdk)
+
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+add_compile_options("/wd5082") # CommonLibSSE needs this warning suppressed
 
 list(APPEND CMAKE_IGNORE_PATH "${PROJECT_BINARY_DIR}")
 list(APPEND CMAKE_MODULE_PATH
@@ -51,9 +69,9 @@ target_link_libraries(
 
 set(PAPYRUS_IMPORTS
 	"${PROJECT_SOURCE_DIR}/scripts"
-	"$ENV{UIExtensionsPath}/scripts/source"
-	"$ENV{MCMPath}/Source/Scripts"
-	"$ENV{SKSE64Path}/Scripts/Source"
+	"${PROJECT_SOURCE_DIR}/external/UIExtensions/scripts/source"
+	"${mcm_helper_sdk_SOURCE_DIR}/Source/Scripts"
+	"${skse_sdk_SOURCE_DIR}/Data/Scripts/Source"
 )
 
 Papyrus_Add(
