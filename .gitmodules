@@ -7,6 +7,3 @@
 [submodule "tools/SKSE-CMakeModules"]
 	path = tools/SKSE-CMakeModules
 	url = https://github.com/Exit-9B/SKSE-CMakeModules.git
-[submodule "CommonLibSSE-NG"]
-	path = CommonLibSSE-NG
-	url = https://github.com/CharmedBaryon/CommonLibSSE-NG.git
