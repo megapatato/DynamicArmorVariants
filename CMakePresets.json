@@ -6,10 +6,8 @@
                 "CMAKE_BUILD_TYPE": {
                     "type": "STRING",
                     "value": "Debug"
-                }
-            },
-            "errors": {
-                "deprecated": true
+                },
+                "CMAKE_ERROR_DEPRECATED": {"type": "BOOL", "value": false}
             },
             "hidden": true,
             "name": "cmake-dev",
