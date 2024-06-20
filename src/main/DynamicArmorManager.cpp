@@ -351,10 +351,12 @@ void DynamicArmorManager::ResetVariant(RE::Actor* a_actor, const RE::TESObjectAR
 void DynamicArmorManager::ResetAllVariants(RE::Actor* a_actor)
 {
 	_variantOverrides.erase(a_actor->GetFormID());
+	logger::info("Reset all variants on actor {}", a_actor->GetName());
 	Ext::Actor::Update3DSafe(a_actor);
 }
 
 void DynamicArmorManager::ResetAllVariants(RE::FormID a_formID)
 {
+	logger::trace("Reset all variants on form {}", std::to_string(a_formID));
 	_variantOverrides.erase(a_formID);
 }
