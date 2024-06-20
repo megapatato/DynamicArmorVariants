@@ -11,13 +11,15 @@ void ConfigLoader::LoadConfigs()
 	for (auto& file : dataHandler->files) {
 		if (!file)
 			continue;
-
-		auto fileName = fs::path(file->fileName);
-		fileName.replace_extension("json"sv);
-		auto directory = fs::path("SKSE/Plugins/DynamicArmorVariants");
-		auto dynamicArmorFile = directory / fileName;
-
-		LoadConfig(dynamicArmorFile);
+		
+		if (dataHandler->LookupLoadedModByName(file->GetFilename()) or dataHandler->LookupLoadedLightModByName(file->GetFilename())) {
+			auto fileName = fs::path(file->fileName);
+			fileName.replace_extension("json"sv);
+			auto directory = fs::path("SKSE/Plugins/DynamicArmorVariants");
+			auto dynamicArmorFile = directory / fileName;
+			LoadConfig(dynamicArmorFile);
+		} else
+			logger::info("Plugin {} is not enabled, skipping", file->GetFilename());
 	}
 }
 
@@ -39,6 +41,7 @@ void ConfigLoader::LoadConfig(fs::path a_path)
 	if (!root.isObject())
 		return;
 
+	logger::info("\tParsing file {}", a_path.string());
 	Json::Value variants = root["variants"];
 	if (variants.isArray()) {
 		for (auto& variant : variants) {
@@ -118,7 +121,8 @@ void ConfigLoader::LoadConditions(
 
 	auto condition = std::make_shared<RE::TESCondition>();
 	RE::TESConditionItem** head = std::addressof(condition->head);
-
+	
+	logger::info("\t\tCondition block found for variant '{}', parsing", a_variant);
 	for (auto& item : a_conditions) {
 		auto text = item.asString();
 
@@ -130,7 +134,7 @@ void ConfigLoader::LoadConditions(
 			head = std::addressof(conditionItem->next);
 		}
 		else {
-			logger::info("Aborting condition parsing"sv);
+			logger::warn("Aborting condition parsing"sv);
 			return;
 		}
 	}
