@@ -13,6 +13,9 @@ auto ConditionParser::Parse(std::string_view a_text, const RefMap& a_refs) -> RE
 		return nullptr;
 	}
 
+	// string stream to report to the user what was parsed
+	std::stringstream ss;
+
 	RE::CONDITION_ITEM_DATA data;
 	auto& mFunction = m[1];
 	auto& mParam1 = m[3];
@@ -26,6 +29,8 @@ auto ConditionParser::Parse(std::string_view a_text, const RefMap& a_refs) -> RE
 	if (!function || !function->conditionFunction) {
 		logger::error("Did not find condition function: {}"sv, mFunction.str());
 		return nullptr;
+	} else {
+		ss << mFunction.str() << "(";
 	}
 
 	auto functionIndex = util::to_underlying(function->output) - 0x1000;
@@ -35,6 +40,7 @@ auto ConditionParser::Parse(std::string_view a_text, const RefMap& a_refs) -> RE
 		if (function->numParams >= 1) {
 			data.functionData.params[0] = std::bit_cast<void*>(
 				ParseParam(mParam1.str(), function->params[0].paramType.get(), a_refs));
+			ss << mParam1.str();
 		}
 		else {
 			logger::warn(
@@ -48,6 +54,7 @@ auto ConditionParser::Parse(std::string_view a_text, const RefMap& a_refs) -> RE
 		if (function->numParams >= 2) {
 			data.functionData.params[1] = std::bit_cast<void*>(
 				ParseParam(mParam1.str(), function->params[1].paramType.get(), a_refs));
+			ss << ", " << mParam2.str();
 		}
 		else {
 			logger::warn(
@@ -77,22 +84,28 @@ auto ConditionParser::Parse(std::string_view a_text, const RefMap& a_refs) -> RE
 		else if (op == "<="s) {
 			data.flags.opCode = RE::CONDITION_ITEM_DATA::OpCode::kLessThanOrEqualTo;
 		}
+		ss << ") " << op;
 	}
 	else {
 		data.flags.opCode = RE::CONDITION_ITEM_DATA::OpCode::kNotEqualTo;
+		ss << ")  !=";
 	}
+	
 
 	if (mComparand.matched) {
 		auto comparand = mComparand.str();
 		if (auto global = RE::TESForm::LookupByEditorID<RE::TESGlobal>(comparand)) {
 			data.comparisonValue.g = global;
+			ss << " global(" << comparand << ")";
 		}
 		else {
 			data.comparisonValue.f = std::stof(comparand);
+			ss << " " << comparand;
 		}
 	}
 	else {
 		data.comparisonValue.f = 0.f;
+		ss << " 0.0";
 	}
 
 	if (mConnective.matched) {
@@ -100,10 +113,12 @@ auto ConditionParser::Parse(std::string_view a_text, const RefMap& a_refs) -> RE
 		if (connective == "OR"s) {
 			data.flags.isOR = true;
 		}
+		ss << " " << mConnective.str();
 	}
 
 	auto conditionItem = new RE::TESConditionItem();
 	conditionItem->data = data;
+	logger::info("\t\tParsed: {}", ss.str());
 	return conditionItem;
 }
 
