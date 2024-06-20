@@ -13,7 +13,7 @@ cmake --build buildVR --target "DynamicArmorVariants" --config Release || goto :
 cmake --install buildVR --component "SKSEPlugin" --prefix "package/SkyrimVR" || goto :error
 
 pushd package
-7z a -r -t7Z "..\DynamicArmorVariants.7z" *
+7z.exe a -r -t7Z "..\DynamicArmorVariants.7z" *
 popd
 
 goto :EOF
