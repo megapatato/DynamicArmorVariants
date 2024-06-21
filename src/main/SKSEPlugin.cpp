@@ -98,6 +98,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 		{
 			switch (a_msg->type) {
 			case SKSE::MessagingInterface::kPreLoadGame:
+			case SKSE::MessagingInterface::kNewGame:
 				ConfigLoader::LoadConfigs();
 				WornFormUpdater::Install();
 				break;
